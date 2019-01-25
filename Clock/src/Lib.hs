@@ -4,6 +4,7 @@ import Paths_Clock (getDataFileName)
 
 import System.Environment (getArgs)
 import System.Process (runCommand, waitForProcess)
+import System.IO (hFlush, stdout)
 import GHC.IO.Exception (ExitCode(..))
 import Data.List.Split (splitOn)
 import qualified Data.List as List
@@ -31,20 +32,14 @@ appendRow row = do
   filePath <- timesheetPath
   appendFile filePath $ line
 
-data ActionType = ClockIn | ClockOut | Launch | Unrecognized
+data ActionType = ClockIn | ClockOut | Launch | Clear | Unrecognized
 
 action :: [String] -> ActionType
 action ("in":_) = ClockIn
 action ("out":_) = ClockOut
 action ("open":_) = Launch
+action ("clear":_) = Clear
 action _ = Unrecognized
-
--- let inTime filename =
-  --   let inStr = 
-    --     readFile filename
-    --     |> Seq.last |> Seq.head
-    
-    --   Convert.ToDateTime inStr
 
 timeOfClockIn :: IO (Maybe Time.ZonedTime)
 timeOfClockIn = do
@@ -101,6 +96,19 @@ openTimesheet = do
     ExitFailure code -> pure $ Left $ "Exit code: " ++ show code
 
 
+clearTimesheet :: IO ()
+clearTimesheet = do
+  putStrLn "Are you sure you want to clear the timesheet?"
+  putStr "(y/n):"
+  hFlush stdout
+  ans <- getLine
+  case ans of 
+    "y" -> do
+      filePath <- timesheetPath
+      writeFile filePath "Clocked In:,Clocked Out:,Duration:"
+    _ -> pure ()
+
+
 someFunc :: IO ()
 someFunc = do
   args <- getArgs
@@ -109,6 +117,9 @@ someFunc = do
       ClockIn -> clockIn
       ClockOut -> clockOut
       Launch -> openTimesheet
+      Clear -> do
+        clearTimesheet
+        pure $ Right "done"
       Unrecognized -> pure $ Left "huh?"
 
   case result of 
