@@ -55,7 +55,7 @@ timeOfClockIn = do
 clockedOut :: [[String]] -> Bool
 clockedOut fileLines = 
   case List.lastMay fileLines of
-    Just last -> List.length last > 1
+    Just lastX -> List.length lastX > 1
     Nothing -> True
     
 clockedIn :: [[String]] -> Bool
@@ -87,6 +87,9 @@ clockOut = do
 
         appendRow [",", iso8601Show now, ",", diffStr]
         pure $ Right $ "Clocked out; elapsed time: " ++ diffStr
+      Nothing -> 
+        pure $ Left "Couldn't read the clock-in time from the timesheet.  Try opening it and looking for bad data."
+
 
 openTimesheet :: IO (Either String String)
 openTimesheet = do
