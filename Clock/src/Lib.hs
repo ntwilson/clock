@@ -83,7 +83,7 @@ clockOut = do
       Just inTime -> do
         let 
           diff = Time.diffUTCTime (Time.zonedTimeToUTC now) (Time.zonedTimeToUTC inTime)
-          diffStr = Time.formatTime Time.defaultTimeLocale "%h:%M%ES" diff
+          diffStr = Time.formatTime Time.defaultTimeLocale "%h:%M:%ES" diff
 
         appendRow [",", iso8601Show now, ",", diffStr]
         pure $ Right $ "Clocked out; elapsed time: " ++ diffStr
